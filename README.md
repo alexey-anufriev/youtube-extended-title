@@ -25,7 +25,7 @@ Example: [12:34] Video Title | Channel
 4. Open Chrome `→` `chrome://extensions`
 5. Enable Developer mode
 6. Click "Load unpacked"
-7. Select the project folder
+7. Select the `dist` folder
 
 ---
 
