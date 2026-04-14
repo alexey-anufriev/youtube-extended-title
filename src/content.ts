@@ -1,15 +1,22 @@
 ((): void => {
+    /** Prevents scheduling multiple title updates in the same microtask turn. */
     let applyScheduled = false;
+
+    /** Guards the title observer from reacting to this script's own writes. */
     let isWritingTitle = false;
 
+    /** Returns true when the current URL is a YouTube watch page. */
     function isWatchPage(): boolean {
         return location.pathname === "/watch" && new URLSearchParams(location.search).has("v");
     }
 
+    /** Reads and parses duration metadata from YouTube's microformat node. */
     function getMicroformatData(): { duration?: string } | null {
         const el = document.querySelector("#microformat");
         const raw = el?.textContent?.trim();
-        if (!raw) return null;
+        if (!raw) {
+            return null;
+        }
 
         try {
             return JSON.parse(raw);
@@ -18,54 +25,7 @@
         }
     }
 
-    function parseISO8601Duration(input: string): string | null {
-        if (!input.startsWith("PT")) return null;
-
-        let total = 0;
-        let current = "";
-
-        for (let i = 2; i < input.length; i++) {
-            const c = input[i];
-
-            if (c >= "0" && c <= "9") {
-                current += c;
-                continue;
-            }
-
-            if (!current) continue;
-
-            const value = Number(current);
-            current = "";
-
-            if (c === "H") total += value * 3600;
-            else if (c === "M") total += value * 60;
-            else if (c === "S") total += value;
-        }
-
-        if (total <= 0) return null;
-
-        const h = Math.floor(total / 3600);
-        const m = Math.floor((total % 3600) / 60);
-        const s = total % 60;
-
-        return h > 0
-            ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-            : `${m}:${String(s).padStart(2, "0")}`;
-    }
-
-    function stripPrefix(title: string): string {
-        if (!title.startsWith("[")) {
-            return title;
-        }
-
-        const closing = title.indexOf("]");
-        if (closing === -1) {
-            return title;
-        }
-
-        return title.slice(closing + 2);
-    }
-
+    /** Builds the tab title with a duration prefix when metadata is available. */
     function buildTitle(): string | null {
         if (!isWatchPage()) {
             return null;
@@ -73,7 +33,7 @@
 
         const data = getMicroformatData();
         const duration = data?.duration
-            ? parseISO8601Duration(data.duration)
+            ? parseDuration(data.duration)
             : null;
 
         if (!duration) {
@@ -85,6 +45,7 @@
         return `[${duration}] ${baseTitle}`;
     }
 
+    /** Applies the computed title if it differs from the current tab title. */
     function applyTitle(): void {
         const next = buildTitle();
         if (!next || document.title === next) {
@@ -96,8 +57,11 @@
         isWritingTitle = false;
     }
 
+    /** Queues a single title refresh in a microtask. */
     function scheduleApply(): void {
-        if (applyScheduled) return;
+        if (applyScheduled) {
+            return;
+        }
 
         applyScheduled = true;
 
@@ -110,9 +74,12 @@
         });
     }
 
+    /** Observes tab title changes so the duration prefix can be restored. */
     function observeTitle(): void {
         const el = document.querySelector("title");
-        if (!el) return;
+        if (!el) {
+            return;
+        }
 
         new MutationObserver(() => {
             if (!isWritingTitle) {
@@ -123,9 +90,12 @@
         });
     }
 
+    /** Observes microformat changes so metadata updates are applied. */
     function observeMicroformat(): void {
         const el = document.querySelector("#microformat");
-        if (!el) return;
+        if (!el) {
+            return;
+        }
 
         new MutationObserver(() => {
             scheduleApply();
@@ -136,6 +106,7 @@
         });
     }
 
+    /** Starts DOM observers and performs the initial title update. */
     function start(): void {
         observeTitle();
         observeMicroformat();
