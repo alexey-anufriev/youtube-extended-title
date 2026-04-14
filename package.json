@@ -1,0 +1,15 @@
+{
+  "name": "youtube-title-watchtime",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Adds YouTube video watchtime to the browser tab title.",
+  "scripts": {
+    "clean": "node scripts/clean-dist.mjs",
+    "build": "npm run clean && tsc && node scripts/copy-assets.mjs",
+    "watch": "tsc -w"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

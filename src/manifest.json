@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Title Watchtime",
+  "version": "0.1.0",
+  "description": "Adds the current YouTube video's duration to the browser tab title.",
+  "icons": {
+    "16": "icon_16.png",
+    "32": "icon_32.png",
+    "48": "icon_48.png",
+    "128": "icon_128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icon_16.png",
+      "32": "icon_32.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
