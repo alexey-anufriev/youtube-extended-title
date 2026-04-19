@@ -46,12 +46,29 @@ function parseDuration(input: string): string | null {
         : `${m}:${String(s).padStart(2, "0")}`;
 }
 
-/** Removes a leading duration prefix previously added to the tab title. */
-function stripPrefix(title: string): string {
-    const match = title.match(/^\[(\d{1,2}:)?\d{1,2}:\d{2}\]\s+/);
-    if (!match) {
-        return title;
+/** Formats large counts into compact K/M/B strings for shorter tab titles. */
+function formatCompactCount(input: string): string | null {
+    const numericValue = Number(input);
+    if (!Number.isFinite(numericValue) || numericValue < 0) {
+        return null;
     }
 
-    return title.slice(match[0].length);
+    return new Intl.NumberFormat("en", {
+        maximumFractionDigits: 1,
+        notation: "compact"
+    }).format(numericValue);
+}
+
+/** Removes leading metadata prefixes previously added to the tab title. */
+function stripPrefix(title: string): string {
+    let strippedTitle = title;
+
+    while (true) {
+        const match = strippedTitle.match(/^(?:\[(\d{1,2}:)?\d{1,2}:\d{2}\]|\[(?:👁|👍)\s[^\]]+\])\s+/);
+        if (!match) {
+            return strippedTitle;
+        }
+
+        strippedTitle = strippedTitle.slice(match[0].length);
+    }
 }
