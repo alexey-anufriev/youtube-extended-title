@@ -1,6 +1,6 @@
-# YouTube Title Watchtime
+# YouTube Extended Title
 
-Adds video duration to YouTube tab titles.
+Extends YouTube tab titles with video metadata.
 
 Example: [12:34] Video Title | Channel
 
@@ -8,7 +8,7 @@ Example: [12:34] Video Title | Channel
 
 ## Features
 
-- Prefixes YouTube tab titles with video duration
+- Prefixes YouTube tab titles with video metadata such as duration
 - Works with YouTube navigation (no page reload needed)
 - Lightweight and fast (no timers, minimal DOM observers)
 - No dependencies

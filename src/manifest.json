@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Title Watchtime",
-  "version": "0.1.0",
-  "description": "Adds the current YouTube video's duration to the browser tab title.",
+  "name": "YouTube Extended Title",
+  "version": "0.2.0",
+  "description": "Extends YouTube browser tab titles with video metadata such as duration.",
   "icons": {
     "16": "icon_16.png",
     "32": "icon_32.png",

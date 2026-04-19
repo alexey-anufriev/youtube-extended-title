@@ -1,8 +1,8 @@
 {
-  "name": "youtube-title-watchtime",
+  "name": "youtube-extended-title",
   "version": "0.1.0",
   "private": true,
-  "description": "Adds YouTube video watchtime to the browser tab title.",
+  "description": "Extends YouTube browser tab titles with video metadata.",
   "scripts": {
     "clean": "node scripts/clean-dist.mjs",
     "build": "npm run clean && tsc && node scripts/copy-assets.mjs",

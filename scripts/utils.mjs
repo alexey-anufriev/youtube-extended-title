@@ -3,4 +3,4 @@ import { fileURLToPath } from "node:url";
 
 export const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const distDir = resolve(rootDir, "dist");
-export const archivePath = resolve(distDir, "youtube-title-watchtime.zip");
+export const archivePath = resolve(distDir, "youtube-extended-title.zip");
