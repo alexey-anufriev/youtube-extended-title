@@ -1,9 +1,14 @@
 ((): void => {
+    const WATCHTIME_PREFIX_ENABLED_KEY = "watchtimePrefixEnabled";
+
     /** Prevents scheduling multiple title updates in the same microtask turn. */
     let applyScheduled = false;
 
     /** Guards the title observer from reacting to this script's own writes. */
     let isWritingTitle = false;
+
+    /** Tracks whether the watchtime prefix is enabled in extension settings. */
+    let watchtimePrefixEnabled = true;
 
     /** Returns true when the current URL is a YouTube watch page. */
     function isWatchPage(): boolean {
@@ -27,6 +32,10 @@
 
     /** Builds the tab title with a duration prefix when metadata is available. */
     function buildTitle(): string | null {
+        if (!watchtimePrefixEnabled) {
+            return null;
+        }
+
         if (!isWatchPage()) {
             return null;
         }
@@ -45,10 +54,27 @@
         return `[${duration}] ${baseTitle}`;
     }
 
+    /** Removes the injected prefix when settings or page state require it. */
+    function clearInjectedPrefix(): void {
+        const strippedTitle = stripPrefix(document.title);
+        if (strippedTitle === document.title) {
+            return;
+        }
+
+        isWritingTitle = true;
+        document.title = strippedTitle;
+        isWritingTitle = false;
+    }
+
     /** Applies the computed title if it differs from the current tab title. */
     function applyTitle(): void {
         const next = buildTitle();
-        if (!next || document.title === next) {
+        if (!next) {
+            clearInjectedPrefix();
+            return;
+        }
+
+        if (document.title === next) {
             return;
         }
 
@@ -106,12 +132,32 @@
         });
     }
 
+    /** Loads the current setting from storage before the first title update. */
+    async function loadSettings(): Promise<void> {
+        const stored = await chrome.storage.sync.get(WATCHTIME_PREFIX_ENABLED_KEY);
+        watchtimePrefixEnabled = stored[WATCHTIME_PREFIX_ENABLED_KEY] !== false;
+    }
+
+    /** Keeps the current tab title in sync with options page changes. */
+    function observeSettings(): void {
+        chrome.storage.onChanged.addListener((changes, areaName) => {
+            if (areaName !== "sync" || !changes[WATCHTIME_PREFIX_ENABLED_KEY]) {
+                return;
+            }
+
+            watchtimePrefixEnabled = changes[WATCHTIME_PREFIX_ENABLED_KEY].newValue !== false;
+            scheduleApply();
+        });
+    }
+
     /** Starts DOM observers and performs the initial title update. */
-    function start(): void {
+    async function start(): Promise<void> {
+        await loadSettings();
         observeTitle();
         observeMicroformat();
+        observeSettings();
         applyTitle();
     }
 
-    start();
+    void start();
 })();

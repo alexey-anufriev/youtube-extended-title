@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Extended Title Settings</title>
+    <style>
+        :root {
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(210, 94, 54, 0.18), transparent 32%),
+                linear-gradient(180deg, #f8f3ea 0%, #efe4d4 100%);
+        }
+
+        main {
+            box-sizing: border-box;
+            max-width: 760px;
+            margin: 48px auto;
+            padding: 32px;
+            border: 1px solid rgba(31, 26, 22, 0.1);
+            border-radius: 24px;
+            background: rgba(255, 252, 247, 0.92);
+            box-shadow: 0 18px 40px rgba(78, 51, 28, 0.12);
+        }
+
+        header {
+            display: grid;
+            gap: 10px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(31, 26, 22, 0.1);
+        }
+
+        .eyebrow {
+            margin: 0;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #9b5a43;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            line-height: 1.1;
+        }
+
+        p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .settings-section {
+            margin-top: 28px;
+        }
+
+        .settings-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .setting-row {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 18px 20px;
+            border-radius: 18px;
+            background: #fff;
+            border: 1px solid rgba(31, 26, 22, 0.08);
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: #c44f2f;
+            flex: none;
+        }
+
+        .label-copy {
+            display: grid;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .label-title {
+            font-weight: 600;
+        }
+
+        .label-description {
+            color: #6e5d4f;
+        }
+
+        code {
+            padding: 0.14rem 0.38rem;
+            border-radius: 8px;
+            background: #f4eadf;
+            color: #6f2f1d;
+            font-family: "SFMono-Regular", "Consolas", monospace;
+            font-size: 0.92em;
+        }
+
+        @media (max-width: 640px) {
+            main {
+                margin: 24px 16px;
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header>
+            <p class="eyebrow">Extension Settings</p>
+            <h1>YouTube Extended Title</h1>
+            <p>Control how video metadata appears in YouTube tab titles. The layout below is structured for additional settings as the extension grows.</p>
+        </header>
+
+        <section class="settings-section">
+            <div class="settings-list">
+                <label class="setting-row" for="watchtimePrefixEnabled">
+                    <input id="watchtimePrefixEnabled" type="checkbox">
+                    <span class="label-copy">
+                        <span class="label-title">Add watchtime prefix</span>
+                        <span class="label-description">Prepends the video title with the duration, for example <code>[12:34] Video Title</code></span>
+                    </span>
+                </label>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="options.js"></script>
+</body>
+</html>

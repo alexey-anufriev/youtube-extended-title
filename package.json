@@ -9,8 +9,8 @@
     "pack": "npm run build && node scripts/pack-dist.mjs",
     "watch": "tsc -w"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@types/chrome": "^0.1.40",
     "typescript": "^5.8.3"
   }
 }

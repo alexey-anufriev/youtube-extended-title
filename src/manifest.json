@@ -3,6 +3,7 @@
   "name": "YouTube Extended Title",
   "version": "0.2.0",
   "description": "Extends YouTube browser tab titles with video metadata such as duration.",
+  "permissions": ["storage"],
   "icons": {
     "16": "icon_16.png",
     "32": "icon_32.png",
@@ -15,6 +16,7 @@
       "32": "icon_32.png"
     }
   },
+  "options_page": "options.html",
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],

@@ -6,6 +6,7 @@ mkdirSync(distDir, { recursive: true });
 
 const filesToCopy = [
     "src/manifest.json",
+    "src/options.html",
     "src/icons/icon_16.png",
     "src/icons/icon_32.png",
     "src/icons/icon_48.png",
