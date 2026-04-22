@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "YouTube Extended Title",
-  "version": "0.2.0",
-  "description": "Extends YouTube browser tab titles with video metadata such as duration.",
+  "version": "0.3.0",
+  "description": "Extends YouTube browser tab titles with video metadata such as duration, views, likes or channel name.",
   "permissions": ["storage"],
   "icons": {
     "16": "icon_16.png",
