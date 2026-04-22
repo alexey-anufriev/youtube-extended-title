@@ -2,7 +2,7 @@
 
 Extends YouTube tab titles with video metadata.
 
-Example: `[12:34] [👁 1.4M] [👍 10.6K] Channel Name: Video Title | Channel`
+Example: `[12:34] [👁 1.4M] [👍 10.6K] Channel Name: Video Title`
 
 ---
 
