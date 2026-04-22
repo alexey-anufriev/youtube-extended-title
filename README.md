@@ -2,14 +2,14 @@
 
 Extends YouTube tab titles with video metadata.
 
-Example: `[12:34] [👁 1.4M] [👍 10.6K] Video Title | Channel`
+Example: `[12:34] [👁 1.4M] [👍 10.6K] Channel Name: Video Title | Channel`
 
 ---
 
 ## Features
 
 - Prefixes YouTube tab titles with video metadata
-- Supports watchtime, views, and likes as separate title components
+- Supports watchtime, views, likes, and channel name as separate title components
 - Uses compact emoji prefixes for shorter titles, such as `[👁 1.4M]` and `[👍 10.6K]`
 - Includes a settings page with independent toggles for each metadata component
 - Works with YouTube navigation (no page reload needed)
@@ -36,7 +36,7 @@ Example: `[12:34] [👁 1.4M] [👍 10.6K] Video Title | Channel`
 
 - Reads duration, watch count, and likes from YouTube `#microformat`
 - Observes DOM changes to keep the title in sync
-- Prepends enabled metadata components in this order: watchtime, views, likes
+- Prepends enabled metadata components in this order: watchtime, views, likes, channel name
 
 ---
 
@@ -45,6 +45,7 @@ Example: `[12:34] [👁 1.4M] [👍 10.6K] Video Title | Channel`
 - `Add watchtime prefix`: enabled by default, example `[12:34] Video Title`
 - `Add views prefix`: disabled by default, example `[👁 1.4M] Video Title`
 - `Add likes prefix`: disabled by default, example `[👍 10.6K] Video Title`
+- `Add channel prefix`: disabled by default, example `Channel Name: Video Title` with names truncated after 20 characters to `...`
 
 ---
 

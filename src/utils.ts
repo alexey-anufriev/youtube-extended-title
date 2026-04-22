@@ -59,6 +59,15 @@ function formatCompactCount(input: string): string | null {
     }).format(numericValue);
 }
 
+/** Truncates long labels for compact display in the browser tab. */
+function truncateLabel(input: string, maxLength: number): string {
+    if (input.length <= maxLength) {
+        return input;
+    }
+
+    return `${input.slice(0, maxLength)}...`;
+}
+
 /** Removes leading metadata prefixes previously added to the tab title. */
 function stripPrefix(title: string): string {
     let strippedTitle = title;

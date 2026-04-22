@@ -2,6 +2,7 @@
     const WATCHTIME_PREFIX_ENABLED_KEY = "watchtimePrefixEnabled";
     const VIEWS_PREFIX_ENABLED_KEY = "viewsPrefixEnabled";
     const LIKES_PREFIX_ENABLED_KEY = "likesPrefixEnabled";
+    const AUTHOR_PREFIX_ENABLED_KEY = "authorPrefixEnabled";
 
     /** Prevents scheduling multiple title updates in the same microtask turn. */
     let applyScheduled = false;
@@ -18,6 +19,9 @@
     /** Tracks whether the likes prefix is enabled in extension settings. */
     let likesPrefixEnabled = false;
 
+    /** Tracks whether the author prefix is enabled in extension settings. */
+    let authorPrefixEnabled = false;
+
     /** Returns true when the current URL is a YouTube watch page. */
     function isWatchPage(): boolean {
         return location.pathname === "/watch" && new URLSearchParams(location.search).has("v");
@@ -29,6 +33,7 @@
     };
 
     type MicroformatData = {
+        author?: string;
         duration?: string;
         interactionStatistic?: InteractionCounter[];
     };
@@ -68,19 +73,64 @@
         return null;
     }
 
+    /** Returns the channel name label from the current metadata when available. */
+    function getAuthorLabel(data: MicroformatData | null): string | null {
+        const author = data?.author?.trim();
+        if (!author) {
+            return null;
+        }
+
+        return truncateLabel(author, 20);
+    }
+
+    /** Returns the channel name prefix when the setting is enabled and metadata is present. */
+    function getAuthorPrefix(data: MicroformatData | null): string | null {
+        if (!authorPrefixEnabled) {
+            return null;
+        }
+
+        const authorLabel = getAuthorLabel(data);
+        if (!authorLabel) {
+            return null;
+        }
+
+        return `${authorLabel}:`;
+    }
+
+    /** Removes the injected author prefix using the current metadata value. */
+    function stripAuthorPrefix(title: string, data: MicroformatData | null): string {
+        const authorLabel = getAuthorLabel(data);
+        if (!authorLabel) {
+            return title;
+        }
+
+        const authorPrefix = `${authorLabel}:`;
+        if (!authorPrefix || !title.startsWith(`${authorPrefix} `)) {
+            return title;
+        }
+
+        return title.slice(authorPrefix.length + 1);
+    }
+
+    /** Removes all extension-managed prefixes from the current tab title. */
+    function getBaseTitle(data: MicroformatData | null): string {
+        return stripAuthorPrefix(stripPrefix(document.title), data);
+    }
+
     /** Builds the tab title with enabled metadata prefixes when available. */
     function buildTitle(): string | null {
         if (!isWatchPage()) {
             return null;
         }
 
-        if (!watchtimePrefixEnabled && !viewsPrefixEnabled && !likesPrefixEnabled) {
+        if (!watchtimePrefixEnabled && !viewsPrefixEnabled && !likesPrefixEnabled && !authorPrefixEnabled) {
             return null;
         }
 
-        const baseTitle = stripPrefix(document.title);
-        const prefixes: string[] = [];
         const data = getMicroformatData();
+        const baseTitle = getBaseTitle(data);
+        const prefixes: string[] = [];
+        const authorPrefix = getAuthorPrefix(data);
 
         if (watchtimePrefixEnabled) {
             const duration = data?.duration
@@ -106,16 +156,26 @@
             }
         }
 
-        if (prefixes.length === 0) {
+        if (prefixes.length === 0 && !authorPrefix) {
             return null;
         }
 
-        return `${prefixes.join(" ")} ${baseTitle}`;
+        const prefixText = prefixes.join(" ");
+        if (authorPrefix && prefixText) {
+            return `${prefixText} ${authorPrefix} ${baseTitle}`;
+        }
+
+        if (authorPrefix) {
+            return `${authorPrefix} ${baseTitle}`;
+        }
+
+        return `${prefixText} ${baseTitle}`;
     }
 
     /** Removes the injected prefix when settings or page state require it. */
     function clearInjectedPrefix(): void {
-        const strippedTitle = stripPrefix(document.title);
+        const data = getMicroformatData();
+        const strippedTitle = getBaseTitle(data);
         if (strippedTitle === document.title) {
             return;
         }
@@ -196,11 +256,13 @@
         const stored = await chrome.storage.sync.get([
             WATCHTIME_PREFIX_ENABLED_KEY,
             VIEWS_PREFIX_ENABLED_KEY,
-            LIKES_PREFIX_ENABLED_KEY
+            LIKES_PREFIX_ENABLED_KEY,
+            AUTHOR_PREFIX_ENABLED_KEY
         ]);
         watchtimePrefixEnabled = stored[WATCHTIME_PREFIX_ENABLED_KEY] !== false;
         viewsPrefixEnabled = stored[VIEWS_PREFIX_ENABLED_KEY] === true;
         likesPrefixEnabled = stored[LIKES_PREFIX_ENABLED_KEY] === true;
+        authorPrefixEnabled = stored[AUTHOR_PREFIX_ENABLED_KEY] === true;
     }
 
     /** Keeps the current tab title in sync with options page changes. */
@@ -220,6 +282,10 @@
 
             if (changes[LIKES_PREFIX_ENABLED_KEY]) {
                 likesPrefixEnabled = changes[LIKES_PREFIX_ENABLED_KEY].newValue === true;
+            }
+
+            if (changes[AUTHOR_PREFIX_ENABLED_KEY]) {
+                authorPrefixEnabled = changes[AUTHOR_PREFIX_ENABLED_KEY].newValue === true;
             }
 
             scheduleApply();
