@@ -1,6 +1,6 @@
 # YouTube Extended Title
 
-Extends YouTube tab titles with video metadata.
+Google Chrome Extension. Extends YouTube tab titles with video metadata.
 
 Example: `[12:34] [👁 1.4M] [👍 10.6K] Channel Name: Video Title`
 
@@ -19,6 +19,10 @@ Example: `[12:34] [👁 1.4M] [👍 10.6K] Channel Name: Video Title`
 ---
 
 ## Installation
+
+### From Chrome Web Store
+
+https://chromewebstore.google.com/detail/youtube-extended-title/kckbkmppdmeackehkfdeckpgjddeibmn
 
 ### From source
 
