@@ -1,13 +1,17 @@
 const WATCHTIME_PREFIX_ENABLED_KEY = "watchtimePrefixEnabled";
 const VIEWS_PREFIX_ENABLED_KEY = "viewsPrefixEnabled";
 const LIKES_PREFIX_ENABLED_KEY = "likesPrefixEnabled";
+const DISLIKES_PREFIX_ENABLED_KEY = "dislikesPrefixEnabled";
 const AUTHOR_PREFIX_ENABLED_KEY = "authorPrefixEnabled";
 const HIDE_ZERO_VALUE_PREFIXES_KEY = "hideZeroValuePrefixes";
+
+const DISLIKES_API_ORIGIN = "https://returnyoutubedislikeapi.com/*";
 
 type ToggleElements = {
     watchtimeCheckbox: HTMLInputElement;
     viewsCheckbox: HTMLInputElement;
     likesCheckbox: HTMLInputElement;
+    dislikesCheckbox: HTMLInputElement;
     authorCheckbox: HTMLInputElement;
     hideZeroValuePrefixesCheckbox: HTMLInputElement;
 };
@@ -16,14 +20,23 @@ function getElements(): ToggleElements {
     const watchtimeCheckbox = document.querySelector<HTMLInputElement>("#watchtimePrefixEnabled");
     const viewsCheckbox = document.querySelector<HTMLInputElement>("#viewsPrefixEnabled");
     const likesCheckbox = document.querySelector<HTMLInputElement>("#likesPrefixEnabled");
+    const dislikesCheckbox = document.querySelector<HTMLInputElement>("#dislikesPrefixEnabled");
     const authorCheckbox = document.querySelector<HTMLInputElement>("#authorPrefixEnabled");
     const hideZeroValuePrefixesCheckbox = document.querySelector<HTMLInputElement>("#hideZeroValuePrefixes");
 
-    if (!watchtimeCheckbox || !viewsCheckbox || !likesCheckbox || !authorCheckbox || !hideZeroValuePrefixesCheckbox) {
+    if (!watchtimeCheckbox || !viewsCheckbox || !likesCheckbox || !dislikesCheckbox
+        || !authorCheckbox || !hideZeroValuePrefixesCheckbox) {
         throw new Error("Options UI is missing required elements.");
     }
 
-    return { watchtimeCheckbox, viewsCheckbox, likesCheckbox, authorCheckbox, hideZeroValuePrefixesCheckbox };
+    return {
+        watchtimeCheckbox,
+        viewsCheckbox,
+        likesCheckbox,
+        dislikesCheckbox,
+        authorCheckbox,
+        hideZeroValuePrefixesCheckbox
+    };
 }
 
 async function initializeOptions(): Promise<void> {
@@ -31,6 +44,7 @@ async function initializeOptions(): Promise<void> {
         watchtimeCheckbox,
         viewsCheckbox,
         likesCheckbox,
+        dislikesCheckbox,
         authorCheckbox,
         hideZeroValuePrefixesCheckbox
     } = getElements();
@@ -38,6 +52,7 @@ async function initializeOptions(): Promise<void> {
         WATCHTIME_PREFIX_ENABLED_KEY,
         VIEWS_PREFIX_ENABLED_KEY,
         LIKES_PREFIX_ENABLED_KEY,
+        DISLIKES_PREFIX_ENABLED_KEY,
         AUTHOR_PREFIX_ENABLED_KEY,
         HIDE_ZERO_VALUE_PREFIXES_KEY
     ]);
@@ -45,6 +60,7 @@ async function initializeOptions(): Promise<void> {
     watchtimeCheckbox.checked = stored[WATCHTIME_PREFIX_ENABLED_KEY] !== false;
     viewsCheckbox.checked = stored[VIEWS_PREFIX_ENABLED_KEY] === true;
     likesCheckbox.checked = stored[LIKES_PREFIX_ENABLED_KEY] === true;
+    dislikesCheckbox.checked = stored[DISLIKES_PREFIX_ENABLED_KEY] === true;
     authorCheckbox.checked = stored[AUTHOR_PREFIX_ENABLED_KEY] === true;
     hideZeroValuePrefixesCheckbox.checked = stored[HIDE_ZERO_VALUE_PREFIXES_KEY] === true;
 
@@ -64,6 +80,28 @@ async function initializeOptions(): Promise<void> {
         await chrome.storage.sync.set({
             [LIKES_PREFIX_ENABLED_KEY]: likesCheckbox.checked
         });
+    });
+
+    dislikesCheckbox.addEventListener("change", async () => {
+        if (dislikesCheckbox.checked) {
+            const granted = await chrome.permissions.request({
+                origins: [DISLIKES_API_ORIGIN]
+            });
+            if (!granted) {
+                dislikesCheckbox.checked = false;
+                return;
+            }
+        }
+
+        await chrome.storage.sync.set({
+            [DISLIKES_PREFIX_ENABLED_KEY]: dislikesCheckbox.checked
+        });
+
+        if (!dislikesCheckbox.checked) {
+            await chrome.permissions.remove({
+                origins: [DISLIKES_API_ORIGIN]
+            });
+        }
     });
 
     authorCheckbox.addEventListener("change", async () => {

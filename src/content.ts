@@ -2,6 +2,7 @@
     const WATCHTIME_PREFIX_ENABLED_KEY = "watchtimePrefixEnabled";
     const VIEWS_PREFIX_ENABLED_KEY = "viewsPrefixEnabled";
     const LIKES_PREFIX_ENABLED_KEY = "likesPrefixEnabled";
+    const DISLIKES_PREFIX_ENABLED_KEY = "dislikesPrefixEnabled";
     const AUTHOR_PREFIX_ENABLED_KEY = "authorPrefixEnabled";
     const HIDE_ZERO_VALUE_PREFIXES_KEY = "hideZeroValuePrefixes";
 
@@ -20,19 +21,45 @@
     /** Tracks whether the likes prefix is enabled in extension settings. */
     let likesPrefixEnabled = false;
 
+    /** Tracks whether the dislikes prefix is enabled in extension settings. */
+    let dislikesPrefixEnabled = false;
+
     /** Tracks whether the author prefix is enabled in extension settings. */
     let authorPrefixEnabled = false;
 
     /** Tracks whether numeric prefixes with a value of zero should be hidden. */
     let hideZeroValuePrefixes = false;
 
+    /** The video whose dislike count is currently loaded or being loaded. */
+    let dislikeVideoId: string | null = null;
+
+    /** The current video's dislike count from Return YouTube Dislike. */
+    let dislikeCount: number | null = null;
+
+    type DislikeResponse = {
+        dislikes?: number;
+    };
+
+    /** Returns the video ID from a supported YouTube URL. */
+    function getVideoId(): string | null {
+        let videoId: string | null = null;
+
+        if (location.pathname === "/watch") {
+            videoId = new URLSearchParams(location.search).get("v");
+        }
+        else {
+            const liveMatch = location.pathname.match(/^\/live\/([^/]+)\/?$/);
+            videoId = liveMatch?.[1] ?? null;
+        }
+
+        return videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)
+            ? videoId
+            : null;
+    }
+
     /** Returns true when the current URL identifies a supported YouTube video page. */
     function isVideoPage(): boolean {
-        const isWatchPage = location.pathname === "/watch"
-            && new URLSearchParams(location.search).has("v");
-        const isLivePage = /^\/live\/[^/]+\/?$/.test(location.pathname);
-
-        return isWatchPage || isLivePage;
+        return getVideoId() !== null;
     }
 
     type InteractionCounter = {
@@ -88,6 +115,41 @@
         return null;
     }
 
+    /** Loads the dislike count once for the current video when the prefix is enabled. */
+    async function loadDislikeCount(): Promise<void> {
+        const videoId = getVideoId();
+        if (!dislikesPrefixEnabled || !videoId) {
+            dislikeVideoId = null;
+            dislikeCount = null;
+            return;
+        }
+
+        if (dislikeVideoId === videoId) {
+            return;
+        }
+
+        dislikeVideoId = videoId;
+        dislikeCount = null;
+
+        try {
+            const response = await chrome.runtime.sendMessage<
+                { type: "getDislikes"; videoId: string },
+                DislikeResponse
+            >({ type: "getDislikes", videoId });
+
+            if (!dislikesPrefixEnabled || getVideoId() !== videoId) {
+                return;
+            }
+
+            if (Number.isFinite(response?.dislikes) && response.dislikes! >= 0) {
+                dislikeCount = response.dislikes!;
+                scheduleApply();
+            }
+        } catch {
+            // Leave the prefix absent when the third-party service is unavailable.
+        }
+    }
+
     /** Returns the channel name label from the current metadata when available. */
     function getAuthorLabel(data: MicroformatData | null): string | null {
         const author = data?.author?.trim();
@@ -138,7 +200,8 @@
             return null;
         }
 
-        if (!watchtimePrefixEnabled && !viewsPrefixEnabled && !likesPrefixEnabled && !authorPrefixEnabled) {
+        if (!watchtimePrefixEnabled && !viewsPrefixEnabled && !likesPrefixEnabled
+            && !dislikesPrefixEnabled && !authorPrefixEnabled) {
             return null;
         }
 
@@ -168,6 +231,15 @@
             const likesCount = getInteractionCount(data, "LikeAction");
             if (likesCount) {
                 prefixes.push(`[👍 ${likesCount}]`);
+            }
+        }
+
+        if (dislikesPrefixEnabled && dislikeVideoId === getVideoId() && dislikeCount !== null) {
+            if (!hideZeroValuePrefixes || dislikeCount !== 0) {
+                const formattedDislikes = formatCompactCount(String(dislikeCount));
+                if (formattedDislikes) {
+                    prefixes.push(`[👎 ${formattedDislikes}]`);
+                }
             }
         }
 
@@ -229,6 +301,7 @@
             applyScheduled = false;
 
             if (!isWritingTitle) {
+                void loadDislikeCount();
                 applyTitle();
             }
         });
@@ -272,12 +345,14 @@
             WATCHTIME_PREFIX_ENABLED_KEY,
             VIEWS_PREFIX_ENABLED_KEY,
             LIKES_PREFIX_ENABLED_KEY,
+            DISLIKES_PREFIX_ENABLED_KEY,
             AUTHOR_PREFIX_ENABLED_KEY,
             HIDE_ZERO_VALUE_PREFIXES_KEY
         ]);
         watchtimePrefixEnabled = stored[WATCHTIME_PREFIX_ENABLED_KEY] !== false;
         viewsPrefixEnabled = stored[VIEWS_PREFIX_ENABLED_KEY] === true;
         likesPrefixEnabled = stored[LIKES_PREFIX_ENABLED_KEY] === true;
+        dislikesPrefixEnabled = stored[DISLIKES_PREFIX_ENABLED_KEY] === true;
         authorPrefixEnabled = stored[AUTHOR_PREFIX_ENABLED_KEY] === true;
         hideZeroValuePrefixes = stored[HIDE_ZERO_VALUE_PREFIXES_KEY] === true;
     }
@@ -301,6 +376,10 @@
                 likesPrefixEnabled = changes[LIKES_PREFIX_ENABLED_KEY].newValue === true;
             }
 
+            if (changes[DISLIKES_PREFIX_ENABLED_KEY]) {
+                dislikesPrefixEnabled = changes[DISLIKES_PREFIX_ENABLED_KEY].newValue === true;
+            }
+
             if (changes[AUTHOR_PREFIX_ENABLED_KEY]) {
                 authorPrefixEnabled = changes[AUTHOR_PREFIX_ENABLED_KEY].newValue === true;
             }
@@ -319,6 +398,7 @@
         observeTitle();
         observeMicroformat();
         observeSettings();
+        void loadDislikeCount();
         applyTitle();
     }
 

@@ -73,7 +73,7 @@ function stripPrefix(title: string): string {
     let strippedTitle = title;
 
     while (true) {
-        const match = strippedTitle.match(/^(?:\[(\d{1,2}:)?\d{1,2}:\d{2}\]|\[(?:👁|👍)\s[^\]]+\])\s+/);
+        const match = strippedTitle.match(/^(?:\[(\d{1,2}:)?\d{1,2}:\d{2}\]|\[(?:👁|👍|👎)\s[^\]]+\])\s+/);
         if (!match) {
             return strippedTitle;
         }

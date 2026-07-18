@@ -2,8 +2,9 @@
   "manifest_version": 3,
   "name": "YouTube Extended Title",
   "version": "0.3.0",
-  "description": "Extends YouTube browser tab titles with video metadata such as duration, views, likes or channel name.",
+  "description": "Extends YouTube browser tab titles with video metadata such as duration, views, likes, dislikes or channel name.",
   "permissions": ["storage"],
+  "optional_host_permissions": ["https://returnyoutubedislikeapi.com/*"],
   "icons": {
     "16": "icon_16.png",
     "32": "icon_32.png",
@@ -17,6 +18,9 @@
     }
   },
   "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],

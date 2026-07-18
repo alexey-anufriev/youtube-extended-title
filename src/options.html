@@ -148,6 +148,14 @@
                     </span>
                 </label>
 
+                <label class="setting-row" for="dislikesPrefixEnabled">
+                    <input id="dislikesPrefixEnabled" type="checkbox">
+                    <span class="label-copy">
+                        <span class="label-title">Add dislikes prefix</span>
+                        <span class="label-description">Prepends the title with the estimated dislike count from <a href="https://returnyoutubedislike.com/" target="_blank" rel="noreferrer">Return YouTube Dislike</a>, for example <code>[👎 2.1K] Video Title</code>. Enabling this sends the video ID to that service.</span>
+                    </span>
+                </label>
+
                 <label class="setting-row" for="authorPrefixEnabled">
                     <input id="authorPrefixEnabled" type="checkbox">
                     <span class="label-copy">
@@ -160,7 +168,7 @@
                     <input id="hideZeroValuePrefixes" type="checkbox">
                     <span class="label-copy">
                         <span class="label-title">Hide zero-value prefixes</span>
-                        <span class="label-description">Omits enabled numeric prefixes when their value is <code>0</code>, such as views or likes. Disabled by default.</span>
+                        <span class="label-description">Omits enabled numeric prefixes when their value is <code>0</code>, such as views, likes, or dislikes. Disabled by default.</span>
                     </span>
                 </label>
             </div>
