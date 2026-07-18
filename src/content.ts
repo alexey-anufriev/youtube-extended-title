@@ -3,6 +3,7 @@
     const VIEWS_PREFIX_ENABLED_KEY = "viewsPrefixEnabled";
     const LIKES_PREFIX_ENABLED_KEY = "likesPrefixEnabled";
     const AUTHOR_PREFIX_ENABLED_KEY = "authorPrefixEnabled";
+    const HIDE_ZERO_VALUE_PREFIXES_KEY = "hideZeroValuePrefixes";
 
     /** Prevents scheduling multiple title updates in the same microtask turn. */
     let applyScheduled = false;
@@ -21,6 +22,9 @@
 
     /** Tracks whether the author prefix is enabled in extension settings. */
     let authorPrefixEnabled = false;
+
+    /** Tracks whether numeric prefixes with a value of zero should be hidden. */
+    let hideZeroValuePrefixes = false;
 
     /** Returns true when the current URL is a YouTube watch page. */
     function isWatchPage(): boolean {
@@ -65,9 +69,16 @@
                 continue;
             }
 
-            return entry.userInteractionCount
-                ? formatCompactCount(entry.userInteractionCount)
-                : null;
+            const count = entry.userInteractionCount;
+            if (!count) {
+                return null;
+            }
+
+            if (hideZeroValuePrefixes && Number(count) === 0) {
+                return null;
+            }
+
+            return formatCompactCount(count);
         }
 
         return null;
@@ -257,12 +268,14 @@
             WATCHTIME_PREFIX_ENABLED_KEY,
             VIEWS_PREFIX_ENABLED_KEY,
             LIKES_PREFIX_ENABLED_KEY,
-            AUTHOR_PREFIX_ENABLED_KEY
+            AUTHOR_PREFIX_ENABLED_KEY,
+            HIDE_ZERO_VALUE_PREFIXES_KEY
         ]);
         watchtimePrefixEnabled = stored[WATCHTIME_PREFIX_ENABLED_KEY] !== false;
         viewsPrefixEnabled = stored[VIEWS_PREFIX_ENABLED_KEY] === true;
         likesPrefixEnabled = stored[LIKES_PREFIX_ENABLED_KEY] === true;
         authorPrefixEnabled = stored[AUTHOR_PREFIX_ENABLED_KEY] === true;
+        hideZeroValuePrefixes = stored[HIDE_ZERO_VALUE_PREFIXES_KEY] === true;
     }
 
     /** Keeps the current tab title in sync with options page changes. */
@@ -286,6 +299,10 @@
 
             if (changes[AUTHOR_PREFIX_ENABLED_KEY]) {
                 authorPrefixEnabled = changes[AUTHOR_PREFIX_ENABLED_KEY].newValue === true;
+            }
+
+            if (changes[HIDE_ZERO_VALUE_PREFIXES_KEY]) {
+                hideZeroValuePrefixes = changes[HIDE_ZERO_VALUE_PREFIXES_KEY].newValue === true;
             }
 
             scheduleApply();

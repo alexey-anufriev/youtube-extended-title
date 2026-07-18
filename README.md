@@ -50,6 +50,7 @@ https://chromewebstore.google.com/detail/youtube-extended-title/kckbkmppdmeackeh
 - `Add views prefix`: disabled by default, example `[👁 1.4M] Video Title`
 - `Add likes prefix`: disabled by default, example `[👍 10.6K] Video Title`
 - `Add channel prefix`: disabled by default, example `Channel Name: Video Title` with names truncated after 20 characters to `...`
+- `Hide zero-value prefixes`: disabled by default; when enabled, omits views and likes prefixes whose value is `0`
 
 ---
 
