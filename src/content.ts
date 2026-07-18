@@ -26,9 +26,13 @@
     /** Tracks whether numeric prefixes with a value of zero should be hidden. */
     let hideZeroValuePrefixes = false;
 
-    /** Returns true when the current URL is a YouTube watch page. */
-    function isWatchPage(): boolean {
-        return location.pathname === "/watch" && new URLSearchParams(location.search).has("v");
+    /** Returns true when the current URL identifies a supported YouTube video page. */
+    function isVideoPage(): boolean {
+        const isWatchPage = location.pathname === "/watch"
+            && new URLSearchParams(location.search).has("v");
+        const isLivePage = /^\/live\/[^/]+\/?$/.test(location.pathname);
+
+        return isWatchPage || isLivePage;
     }
 
     type InteractionCounter = {
@@ -130,7 +134,7 @@
 
     /** Builds the tab title with enabled metadata prefixes when available. */
     function buildTitle(): string | null {
-        if (!isWatchPage()) {
+        if (!isVideoPage()) {
             return null;
         }
 

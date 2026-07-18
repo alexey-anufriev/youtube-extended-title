@@ -12,6 +12,7 @@ Example: `[12:34] [👁 1.4M] [👍 10.6K] Channel Name: Video Title`
 - Supports watchtime, views, likes, and channel name as separate title components
 - Uses compact emoji prefixes for shorter titles, such as `[👁 1.4M]` and `[👍 10.6K]`
 - Includes a settings page with independent toggles for each metadata component
+- Supports both `/watch?v=...` and `/live/{videoId}` video URLs
 - Works with YouTube navigation (no page reload needed)
 - Lightweight and fast (no timers, minimal DOM observers)
 - No dependencies
